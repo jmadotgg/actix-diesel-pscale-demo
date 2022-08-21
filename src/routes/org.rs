@@ -9,11 +9,12 @@ pub fn api_config(cfg: &mut web::ServiceConfig) {
         .service(org_read)
         .service(org_update)
         .service(org_delete)
-        .service(org_by_name);
+        .service(org_by_name)
+        .default_service(web::route().to(HttpResponse::NotFound));
 }
 
 #[post("/org")]
-async fn org_create(new_org: web::Json<NewOrg>) -> HttpResponse {
+async fn org_create(new_org: web::Json<NewOrg>) -> impl Responder {
     let org = dal::org::Org::create(&*new_org);
     HttpResponse::Ok()
         .content_type(ContentType::json())
@@ -23,21 +24,17 @@ async fn org_create(new_org: web::Json<NewOrg>) -> HttpResponse {
 #[get("/org/list")]
 async fn org_read() -> HttpResponse {
     let org = dal::org::Org::read();
-    HttpResponse::Ok()
-        .content_type(ContentType::json())
-        .json(org)
+    HttpResponse::Ok().json(org)
 }
 
 #[put("/org")]
-async fn org_update(updated_org: web::Json<UpdatedOrg>) -> HttpResponse {
+async fn org_update(updated_org: web::Json<UpdatedOrg>) -> impl Responder {
     let org = dal::org::Org::update(&*updated_org);
-    HttpResponse::Ok()
-        .content_type(ContentType::json())
-        .json(org)
+    HttpResponse::Ok().json(org)
 }
 
 #[delete("/org/{id}")]
-async fn org_delete(id: web::Path<String>) -> HttpResponse {
+async fn org_delete(id: web::Path<String>) -> impl Responder {
     println!("Deleting org with id {}", id);
     let id_parse_result = id.parse::<i64>();
 
@@ -53,15 +50,11 @@ async fn org_delete(id: web::Path<String>) -> HttpResponse {
         }
     };
 
-    HttpResponse::Ok()
-        .content_type(ContentType::json())
-        .json(response)
+    HttpResponse::Ok().json(response)
 }
 
 #[get("/org/{name}")]
 async fn org_by_name(name: web::Path<String>) -> impl Responder {
     let org = dal::org::Org::get_by_name(&name.to_string());
-    HttpResponse::Ok()
-        .content_type(ContentType::json())
-        .json(org)
+    HttpResponse::Ok().json(org)
 }
