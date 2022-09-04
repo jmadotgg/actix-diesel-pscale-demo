@@ -12,3 +12,4 @@ dotenv = "0.15.0"
 serde = "1.0.143"
 serde_derive = "1.0.143"
 chrono = { version = "0.4.22", features = ["serde"] }
+actix-files = "0.6.2"

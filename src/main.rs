@@ -1,5 +1,10 @@
 use actix_diesel_pscale_demo::routes;
-use actix_web::{guard, web, App, HttpResponse, HttpServer};
+use actix_files::NamedFile;
+use actix_web::{
+    get, guard,
+    web::{self, ReqData},
+    App, Error, HttpResponse, HttpServer, Responder,
+};
 use dotenv::dotenv;
 use routes::org::api_config;
 use std::env;
@@ -17,6 +22,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .service(web::scope("api").configure(api_config))
+            .service(index)
             .default_service(
                 web::route()
                     .guard(guard::Not(guard::Get()))
@@ -26,4 +32,10 @@ async fn main() -> std::io::Result<()> {
     .bind(addr)?
     .run()
     .await
+}
+
+#[get("/")]
+async fn index() -> Result<NamedFile, Error> {
+    let path = NamedFile::open("static/index.html")?;
+    Ok(path)
 }
