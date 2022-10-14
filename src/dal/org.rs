@@ -31,25 +31,27 @@ pub struct UpdatedOrg {
 
 impl Org {
     pub fn create(organization: &NewOrg) -> Org {
-        let mut connection = establish_connection();
+        let connection = establish_connection();
         let _created_successfully = diesel::insert_into(orgs::table)
             .values(organization)
-            .execute(&mut connection)
+            .execute(&connection)
             .is_ok();
+
+        println!("hello");
 
         orgs::table
             .order(orgs::id.desc())
-            .first(&mut connection)
+            .first(&connection)
             .unwrap()
     }
 
     pub fn read() -> Vec<Org> {
-        let mut connection = establish_connection();
-        orgs::table.load::<Org>(&mut connection).unwrap()
+        let connection = establish_connection();
+        orgs::table.load::<Org>(&connection).unwrap()
     }
 
     pub fn update(org: &UpdatedOrg) -> Org {
-        let mut connection = establish_connection();
+        let connection = establish_connection();
         let org_id = org.id;
         let name = &org.name;
         let description = &org.description;
@@ -61,25 +63,25 @@ impl Org {
                 orgs::description.eq(&description),
                 orgs::url.eq(&url),
             ))
-            .execute(&mut connection)
+            .execute(&connection)
             .is_ok();
 
-        Org::get_by_name(&name).unwrap()
+        Org::get_by_name(name).unwrap()
     }
 
     pub fn delete(record_id: i64) -> bool {
-        let mut connection = establish_connection();
+        let connection = establish_connection();
         diesel::delete(orgs::table.filter(orgs::id.eq(record_id)))
-            .execute(&mut connection)
+            .execute(&connection)
             .is_ok()
     }
 
     pub fn get_by_name(name: &str) -> Option<Org> {
-        let mut connection = establish_connection();
+        let connection = establish_connection();
         let results = orgs::table
             .filter(orgs::name.eq(name))
             .limit(1)
-            .load::<Org>(&mut connection)
+            .load::<Org>(&connection)
             .expect("Error reading orgs");
 
         results.into_iter().next()

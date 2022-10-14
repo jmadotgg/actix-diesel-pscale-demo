@@ -3,6 +3,12 @@ use crate::dal::{
     org::{NewOrg, UpdatedOrg},
 };
 use actix_web::{delete, get, http::header::ContentType, post, put, web, HttpResponse, Responder};
+use serde_derive::{Deserialize, Serialize};
+
+#[derive(Serialize, Deserialize)]
+struct Filter {
+    org_name: String,
+}
 
 pub fn api_config(cfg: &mut web::ServiceConfig) {
     cfg.service(org_create)
@@ -54,7 +60,8 @@ async fn org_delete(id: web::Path<String>) -> impl Responder {
 }
 
 #[get("/org/{name}")]
-async fn org_by_name(name: web::Path<String>) -> impl Responder {
+async fn org_by_name(name: web::Path<String>, filter: web::Query<Filter>) -> impl Responder {
     let org = dal::org::Org::get_by_name(&name.to_string());
+    println!("{}", filter.org_name);
     HttpResponse::Ok().json(org)
 }
